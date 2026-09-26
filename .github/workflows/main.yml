@@ -23,34 +23,15 @@ jobs:
       with:
         channel: 'stable'
 
-    - name: Rebuild Android Environment
+    - name: Prepare Android Files
       run: |
         rm -rf android
         flutter create . --platforms=android --org com.mbplayer.app
 
-    - name: Configure Android SDK & Permissions
+    - name: Update Android MinSDK & Add Permissions
       run: |
-        cat << 'EOF' > fix_config.py
-        import os, glob
-
-        for path in glob.glob('android/app/build.gradle*'):
-            with open(path, 'r', encoding='utf-8') as f:
-                content = f.read()
-            content = content.replace('flutter.minSdkVersion', '21')
-            content = content.replace('flutter.compileSdkVersion', '34')
-            with open(path, 'w', encoding='utf-8') as f:
-                f.write(content)
-
-        manifest = 'android/app/src/main/AndroidManifest.xml'
-        if os.path.exists(manifest):
-            with open(manifest, 'r', encoding='utf-8') as f:
-                content = f.read()
-            if 'INTERNET' not in content:
-                content = content.replace('\n    <application')
-                with open(manifest, 'w', encoding='utf-8') as f:
-                    f.write(content)
-        EOF
-        python3 fix_config.py
+        sed -i 's/flutter.minSdkVersion/21/g' android/app/build.gradle*
+        sed -i '/' android/app/src/main/AndroidManifest.xml
 
     - name: Get dependencies
       run: flutter pub get
