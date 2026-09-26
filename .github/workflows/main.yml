@@ -23,7 +23,7 @@ jobs:
       with:
         channel: 'stable'
 
-    - name: Install Dependencies
+    - name: Get dependencies
       run: flutter pub get
 
     - name: Build APK
