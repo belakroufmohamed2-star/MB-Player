@@ -30,28 +30,27 @@ jobs:
 
     - name: Configure Android SDK & Permissions
       run: |
-        python3 -c "
+        cat << 'EOF' > fix_config.py
         import os, glob
 
         for path in glob.glob('android/app/build.gradle*'):
-            with open(path, 'r') as f:
+            with open(path, 'r', encoding='utf-8') as f:
                 content = f.read()
             content = content.replace('flutter.minSdkVersion', '21')
             content = content.replace('flutter.compileSdkVersion', '34')
-            content = content.replace('minSdk = flutter.minSdkVersion', 'minSdk = 21')
-            content = content.replace('compileSdk = flutter.compileSdkVersion', 'compileSdk = 34')
-            with open(path, 'w') as f:
+            with open(path, 'w', encoding='utf-8') as f:
                 f.write(content)
 
-        manifest_path = 'android/app/src/main/AndroidManifest.xml'
-        if os.path.exists(manifest_path):
-            with open(manifest_path, 'r') as f:
-                m = f.read()
-            if 'android.permission.INTERNET' not in m:
-                m = m.replace('\n    <application')
-                with open(manifest_path, 'w') as f:
-                    f.write(m)
-        "
+        manifest = 'android/app/src/main/AndroidManifest.xml'
+        if os.path.exists(manifest):
+            with open(manifest, 'r', encoding='utf-8') as f:
+                content = f.read()
+            if 'INTERNET' not in content:
+                content = content.replace('\n    <application')
+                with open(manifest, 'w', encoding='utf-8') as f:
+                    f.write(content)
+        EOF
+        python3 fix_config.py
 
     - name: Get dependencies
       run: flutter pub get
